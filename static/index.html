@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inflation Fast</title>
+    <link rel="stylesheet" href="/index.css">
+    <script src="https://cdn.plot.ly/plotly-2.29.1.min.js" charset="utf-8"></script>
+    <script src="index.js"></script>
+
+    <!-- Open Graph metadata -->
+    <meta property="og:title" content="InflationFast - Track Inflation with Real-World Data">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://inflationfast.com">
+    <meta property="og:image" content="https://inflationfast.com/logo.webp">
+    <meta property="og:description" content="InflationFast tracks inflation using real-world data from popular fast-food chains. Explore inflation trends and insights.">
+    <meta property="og:site_name" content="InflationFast">
+</head>
+<body>
+    <div class="pageContainer">
+        <div class="gutter"></div>
+        <div class="contentContainer">
+            <div class="pageTitle">
+                <h1>BK Inflation Tracker</h1>
+                <p id="intro">Tracking <span class="numberMenuItems">??</span> menu items at <span class="numberRestaurants">??</span> restaurants since 2024-03-10.</p>
+                <p id="visitorCount">Visitors: <span class="numberVisitors">??</span></p>
+            </div>
+            <div class="verticalSpacer"></div>
+            <div class="graphBox" id="averageMenuItemOverTime">
+                <h2 class="graphTitle">Average Menu Item Price IN CENTS over time</h2>
+                <div class="verticalSpacerMini"></div>
+                <div class="graphPlaceholder"></div>
+            </div>
+            <div class="verticalSpacer"></div>
+            <div class="graphBox">
+                <h2 class="graphTitle">Category Inflation by State</h2>
+                <div class="verticalSpacerMini"></div>
+                <div class="dateSelector">
+                    <label for="categoryByStateStart">Start:</label>
+                    <input type="date" id="categoryByStateStart" name="dateSelector" min="2024-03-10" value="2024-03-10">
+                    <label for="dateSelector">End:</label>
+                    <input type="date" id="categoryByStateEnd" name="dateSelector" min="2024-03-10">
+                </div>
+                <div class="verticalSpacerMini"></div>
+                <div class="graphPlaceholder" id="categoryInflationByState"></div>
+            </div>
+            <div class="lastElement"></div>
+        </div>
+        <div class="gutter" />
+    </div>
+    
+    
+</body>
+</html>

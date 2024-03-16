@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  fastapi-app:
+    restart: always
+
+  nginx:
+    ports:
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+    restart: always
+
+  db:
+    restart: always
