@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict
 import asyncpg
+import asyncio
 from starlette.requests import Request
 from datetime import datetime
 import os
@@ -51,22 +52,7 @@ async def startup():
         database="inflation"  # Adjust if you're using a different database
     )
 
-    # Update the counts
-    await update_counts()
-    print("Counts updated")
-
-    # Update the average prices by day
-    average_price_by_day = await get_average_prices_by_day()
-    data["average_price_by_day"] = average_price_by_day
-
-    print("Average prices by day updated")
-
-    dates = await get_distinct_created_dates()
-    print("Distinct created dates fetched")
-
-    for date in dates:
-        category_inflation_data[date] = await get_average_prices_by_category(date)
-        print(f"Category inflation data for {date} fetched")
+    update_cache()
 
 
 
@@ -249,6 +235,34 @@ async def log_visit(request: Request):
         "user_agent": user_agent,
         "referrer": referrer
     }
+
+
+async def update_cache():
+    """Update the cache with the latest data from the database. This function is called on startup and can also be called manually."""
+    # Update the counts
+    await update_counts()
+    print("Counts updated")
+
+    # Update the average prices by day
+    average_price_by_day = await get_average_prices_by_day()
+    data["average_price_by_day"] = average_price_by_day
+
+    print("Average prices by day updated")
+
+    dates = await get_distinct_created_dates()
+    print("Distinct created dates fetched")
+
+    for date in dates:
+        category_inflation_data[date] = await get_average_prices_by_category(date)
+        print(f"Category inflation data for {date} fetched")
+
+    print("Cache updated")
+
+
+@router.get("/update")
+async def update(request: Request):
+    asyncio.create_task(update_cache())
+    return {"message": "Cache updated"}
 
 
 app.include_router(router)
