@@ -25,26 +25,34 @@
                 <p id="intro">Tracking <span class="numberMenuItems">??</span> menu items at <span class="numberRestaurants">??</span> restaurants since 2024-03-10.</p>
                 <p id="visitorCount">Visitors: <span class="numberVisitors">??</span></p>
             </div>
-            <div class="verticalSpacer"></div>
-            <div class="graphBox" id="averageMenuItemOverTime">
-                <h2 class="graphTitle">Average Menu Item Price IN CENTS over time</h2>
-                <div class="verticalSpacerMini"></div>
-                <div class="graphPlaceholder"></div>
+            <div class="graphBox">
+                <h2 class="graphTitle">Average Menu Item</h2>
+                <p class="explainText">Average price of every item at every Burger King each day.</p>
+                <div class="graphPlaceholder" id="averageMenuItemOverTime"></div>
             </div>
-            <div class="verticalSpacer"></div>
             <div class="graphBox">
                 <h2 class="graphTitle">Category Inflation by State</h2>
-                <div class="verticalSpacerMini"></div>
+                <p>Category inflation is the average price of all items in a category at all restaurants in a state.</p>
                 <div class="dateSelector">
                     <label for="categoryByStateStart">Start:</label>
                     <input type="date" id="categoryByStateStart" name="dateSelector" min="2024-03-10" value="2024-03-10">
                     <label for="dateSelector">End:</label>
                     <input type="date" id="categoryByStateEnd" name="dateSelector" min="2024-03-10">
                 </div>
-                <div class="verticalSpacerMini"></div>
                 <div class="graphPlaceholder" id="categoryInflationByState"></div>
             </div>
-            <div class="lastElement"></div>
+            <div class="graphBox">
+                <h2 class="graphTitle">Meal Price Average</h2>
+                <p>A meal is a whopper, vanilla shake, and large fries per <a href="https://twitter.com/WallStreetSilv/status/1764297174819770398">inspiration</a></p>
+                <div class="graphPlaceholder" id="averageMealPriceByDay"></div>
+            </div>
+            <div id="suffix">
+                <h2>Links</h2>
+                <h3>Open Source</h3>
+                <p><a href="https://github.com/llmexplorer/inflationfast">Website</a></p>
+                <p><a href="https://github.com/llmexplorer/BKDataHarvest">Burger King Scraper Script</a></p>
+            </div>
+            
         </div>
         <div class="gutter" />
     </div>

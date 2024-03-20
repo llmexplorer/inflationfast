@@ -28,29 +28,25 @@ body, html {
     max-width: 800px;
     height: 100%;
     background-color: #ded6bd;
+
+    display: flex;
+    flex-direction: column;
+    
+    /* Items spaced out vertically */
+    justify-content: space-between;
+
+}
+
+.graphBox {
+    width: 100%;
 }
 
 .pageContainer {
     background-color: #ded6bd;
 }
 
-.verticalSpacer {
-    width: 100%;
-    height: 20px;
-}
-
-.verticalSpacerMini {
-    width: 100%;
-    height: 10px;
-}
-
 .graphPlaceholder {
     width: 100%;
-    height: 500px;
-}
-
-#categoryInflationByState {
-    height: 800px;
 }
 
 .lastElement {

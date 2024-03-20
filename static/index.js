@@ -65,6 +65,12 @@ const bkc = {
         .then(response => response.json())
         .then(success)
         .catch(failure);
+    },
+    getAverageMealPriceByDay: function(success, failure) {
+        fetch(this.getUrl() + "/average_meal_price_by_day")
+        .then(response => response.json())
+        .then(success)
+        .catch(failure);
     }
 }
 
@@ -146,10 +152,37 @@ function main() {
     }
 
     function averageMealPriceOverTime(data) {
-        const graphHolder = document.getElementById('averageMealPriceOverTime');
+        const graphHolder = document.getElementById('averageMealPriceByDay');
 
+        const x = data.x;
+        const y = data.y;
 
+        const graphData = {
+            x: x,
+            y: y,
+            type: 'scatter',
+            name: 'Average Meal Price by Day',
+            mode: 'lines+markers',
+            marker: {color: 'red'},
+        };
 
+        const layout = {
+            title: 'Average Meal Price by Day',
+            plot_bgcolor: '#c5b480',
+            paper_bgcolor: '#c5b480',
+            xaxis: {
+                title: 'Date',
+                type: 'date',
+                tickformat: '%Y-%m-%d',
+                dtick: 86400000 // This line sets the interval between ticks to one day
+            },
+            yaxis: {
+                title: 'Average Price'
+            },
+            
+        };
+
+        Plotly.newPlot(graphHolder, [graphData], layout, {responsive: true});
     }
 
     
@@ -298,6 +331,9 @@ function main() {
 
     //fire end change event to update the plot
     averageByCategoryStateEnd.dispatchEvent(new Event("change"));
+
+
+    bkc.getAverageMealPriceByDay(averageMealPriceOverTime, console.error);
 
     
 }
