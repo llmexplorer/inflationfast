@@ -7,30 +7,28 @@ import asyncio
 from starlette.requests import Request
 from datetime import datetime
 import os
+import logging
+from request_schemas import IdsInput, PricesByCategoryInput
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logging.info("Starting up")
+
 
 # Get the password from the environment
-postgres_password = os.environ.get("POSTGRES_PASSWORD", "postgres123")
-
-class IdsInput(BaseModel):
-    ids: List[str]
-
-
-class PricesByCategoryInput(BaseModel):
-    start_date: str
-    end_date: str
+postgres_password = os.environ.get("POSTGRES_PASSWORD")
+logging.info(f"Got password from environment variables: {postgres_password is not None}")
 
 
 app = FastAPI()
 router = APIRouter(prefix="/api")
 
-counts = {}
-
+# Initialize the cache
 data = {}
+
 
 visiter_ips = []
 visiters = set()
-
-category_inflation_data = {}
 
 # Set up CORS middleware
 app.add_middleware(
@@ -44,59 +42,55 @@ app.add_middleware(
 # Initialize the connection pool
 @app.on_event("startup")
 async def startup():
+    logging.info("Connecting to database")
+
     app.state.pool = await asyncpg.create_pool(
         host="db",  # Adjust if your DB is hosted elsewhere
         port=5432,
         user="postgres",
         password=postgres_password,
-        database="inflation"  # Adjust if you're using a different database
+        database="inflation",
     )
+    logging.info("Connected to database")
 
-    update_cache()
-
+    await update_cache()
 
 
 # Close the connection pool
 @app.on_event("shutdown")
 async def shutdown():
+    logging.info("Closing connection pool")
     await app.state.pool.close()
+    logging.info("Connection pool closed")
+
 
 # Dependency to get a connection from the pool
 async def get_connection(request: Request):
     async with request.app.state.pool.acquire() as connection:
         yield connection
 
-@router.get("/")
-def read_root():
-    return {"message": "Hello, World!"}
 
 @router.post("/count_ids")
 async def count_ids(input_data: IdsInput):
-    try:
-        # Get the connection from the pool
-        result = {}
+    result = {}
 
-        for id in input_data.ids:
-            result[id] = counts.get(id, "<Not found>")
+    for item_id in input_data.ids:
+        result[item_id] = data["counts"].get(item_id, 0)
 
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.get("/average_price_by_day")
-async def get_average_price_by_day():
-    return data["average_price_by_day"]
+    return result
 
 
 async def update_counts():
+    counts = {}
     async with app.state.pool.acquire() as conn:
-        counts["restaurants"] = await conn.fetchval("select count(*) from bk_restaurants")
-        counts["menuitems"] = await conn.fetchval("SELECT COUNT(*) FROM bk_menuitems WHERE created_date = (SELECT MAX(created_date) FROM bk_menuitems)")
+        counts["restaurants"] = await conn.fetchval("select count(distinct store_id) from bk_restaurants")
+        counts["menuitems"] = await conn.fetchval("SELECT COUNT(*) FROM bk_menuitems WHERE created_date = (SELECT MIN(created_date) FROM bk_menuitems)")
         counts["visits"] = await conn.fetchval("SELECT COUNT(*) FROM website_visits")
 
+    data["counts"] = counts
 
-async def get_average_prices_by_day() -> Dict[str, List]:
+
+async def average_prices_by_day() -> Dict[str, List]:
     async with app.state.pool.acquire() as conn:
         # Get unique dates
         dates = await conn.fetch("SELECT DISTINCT created_date FROM bk_menuitems ORDER BY created_date")
@@ -118,7 +112,8 @@ async def get_average_prices_by_day() -> Dict[str, List]:
 
         return result
     
-async def get_distinct_created_dates() -> List[str]:
+
+async def distinct_created_dates() -> List[str]:
     async with app.state.pool.acquire() as conn:
         # Execute the query and fetch the results
         records = await conn.fetch("SELECT DISTINCT(created_date) FROM bk_menuitems")
@@ -170,24 +165,21 @@ async def get_average_prices_by_category(date_str: str) -> Dict[str, List]:
 
 @router.post("/prices_by_category")
 async def get_prices_by_category(input_data: PricesByCategoryInput):
+    logging.info(f"Getting prices by category for {input_data.start_date} to {input_data.end_date}")
     result = {}
+    average_prices = data["average_prices_by_category"]
+    dates = sorted(average_prices.keys())
 
-    # get the date closest to the start date without being before it
-    true_start = None
-    for date in category_inflation_data:
-        if date >= input_data.start_date and (true_start is None or date < true_start):
-            true_start = date
+    start = input_data.start_date if input_data.start_date in dates else dates[0]
+    end = input_data.end_date if input_data.end_date in dates else dates[-1]
+    
+    result[start] = average_prices[start]
+    result[end] = average_prices[end]
 
-    # get the date closest to the end date without being after it
-    true_end = None
-    for date in category_inflation_data:
-        if date <= input_data.end_date and (true_end is None or date > true_end):
-            true_end = date
-
-    result[true_start] = category_inflation_data[true_start]
-    result[true_end] = category_inflation_data[true_end]
+    logging.info(f"Got prices for {start} and {end}")
 
     return result
+
 
 @router.get("/visit")
 async def log_visit(request: Request):
@@ -196,7 +188,7 @@ async def log_visit(request: Request):
     user_agent = request.headers.get("User-Agent")
     referrer = request.headers.get("Referer")
 
-    counts["visits"] += 1
+    data["counts"]["visits"] += 1
 
     # don't need to track people just refreshing the page
     if client_ip in visiters:
@@ -239,30 +231,94 @@ async def log_visit(request: Request):
 
 async def update_cache():
     """Update the cache with the latest data from the database. This function is called on startup and can also be called manually."""
+    logging.info("Updating cache")
+
     # Update the counts
     await update_counts()
-    print("Counts updated")
+    logging.info("Counts updated")
 
     # Update the average prices by day
-    average_price_by_day = await get_average_prices_by_day()
+    average_price_by_day = await average_prices_by_day()
     data["average_price_by_day"] = average_price_by_day
+    logging.info("Average prices by day updated")
 
-    print("Average prices by day updated")
+    dates = await distinct_created_dates()
+    data["dates"] = dates
+    logging.info(f"Dates updated - {len(dates)} dates found")
 
-    dates = await get_distinct_created_dates()
-    print("Distinct created dates fetched")
+    data["average_prices_by_category"] = {}
 
     for date in dates:
-        category_inflation_data[date] = await get_average_prices_by_category(date)
-        print(f"Category inflation data for {date} fetched")
+        data["average_prices_by_category"][date] = await get_average_prices_by_category(date)
+        logging.info(f"Average prices for {date} updated")
 
-    print("Cache updated")
+    average_meal_price_by_day = await get_average_meal_price_by_day()
+    data["average_meal_price_by_day"] = average_meal_price_by_day
+    logging.info("Average meal price by day updated")
 
+    logging.info("Cache updated")
+
+
+@router.get("/get_data")
+async def get_data(request: Request):
+    """
+    The request should contain a key.  Return the value associated with that key from the cache.
+    
+    """
+    key = request.query_params.get("key")
+
+    if key is None:
+        return {"error": "No key provided"}
+
+    if key in data:
+        return {key: data[key]}
+    else:
+        return {"error": "Key not found"}
+    
 
 @router.get("/update")
 async def update(request: Request):
     asyncio.create_task(update_cache())
     return {"message": "Cache updated"}
+
+
+@router.get("/average_price_by_day")
+async def get_average_prices_by_day(request: Request):
+    return data["average_price_by_day"]
+
+
+@router.get("/average_meal_price_by_day")
+async def get_average_meal_price_by_day(request: Request):
+    return data["average_meal_price_by_day"]
+
+
+@router.get("/get_distinct_dates")
+async def get_distinct_dates(request: Request):
+    return data["dates"]
+
+
+async def get_average_meal_price_by_day() -> Dict[str, List]:
+    async with app.state.pool.acquire() as conn:
+        # Execute the query to get the average meal price for each date
+        records = await conn.fetch("""
+            SELECT created_date, SUM(avg_price) AS total_avg_price
+            FROM (
+                SELECT item_id, created_date, AVG(price_default) AS avg_price
+                FROM bk_menuitems
+                WHERE item_id IN ('bd47eecb-0540-4132-b49c-da086789f17b', 'item_781', 'e25ae714-ff81-4d54-922d-d4b7fd40e1e6')
+                GROUP BY item_id, created_date
+            ) AS subquery
+            GROUP BY created_date
+            ORDER BY created_date;
+        """)
+
+        # Format the result as an object with x: list of days, y: list of average meal prices
+        result = {
+            "x": [record['created_date'].isoformat() for record in records],
+            "y": [record['total_avg_price'] for record in records]
+        }
+
+        return result
 
 
 app.include_router(router)

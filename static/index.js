@@ -13,9 +13,10 @@ const bkc = {
             .then(success)
             .catch(failure);
     },
-    helloWorld: function(success, failure) {
-        fetch(this.getUrl())
-            .then(response => response.text())
+    getData: function(key, success, failure) {
+        // get get_data endpoint with key as the parameter
+        fetch(this.getUrl() + "/get_data?key=" + key)
+            .then(response => response.json())
             .then(success)
             .catch(failure);
     },
@@ -58,6 +59,12 @@ const bkc = {
         .then(response => response.text())
         .then(console.log)
         .catch(console.error);
+    },
+    getAvailableDates: function(success, failure) {
+        fetch(this.getUrl() + "/get_distinct_dates")
+        .then(response => response.json())
+        .then(success)
+        .catch(failure);
     }
 }
 
@@ -96,6 +103,7 @@ function main() {
     bkc.visit();
 
     function menuAverageOverTime(data) {
+        console.log(data);
         const x = data.x; // x is a list of dates in YYYY-MM-DD format
         const y = data.y; // y is a list of average prices
 
@@ -137,6 +145,15 @@ function main() {
 
     }
 
+    function averageMealPriceOverTime(data) {
+        const graphHolder = document.getElementById('averageMealPriceOverTime');
+
+
+
+    }
+
+    
+
     function categoryInflationByState(data) {
         const categoryInflationByState = document.getElementById('categoryInflationByState');
 
@@ -144,51 +161,41 @@ function main() {
         const keys = Object.keys(data);
         keys.sort();
 
-        const states = [];
-        const categories = [];
+        const startDate = keys[0];
+        const endDate = keys[keys.length - 1];
 
+        const startValues = data[startDate];
+        const endValues = data[endDate];
+
+        const stateCategoryDifferences = {};
+
+        for (let key in startValues) {
+            let parts = key.split(",");
+            let state = parts[0];
+            let category = parts[1];
+
+            if (!stateCategoryDifferences[state]) {
+                stateCategoryDifferences[state] = {};
+            }
+
+            stateCategoryDifferences[state][category] = endValues[key] - startValues[key];
+
+        }
+
+        //differences is a 2d array of differences
         const differences = [];
-        const start = data[keys[0]];
-        const end = data[keys[keys.length - 1]];
+        const states = Object.keys(stateCategoryDifferences);
+        const categories = Object.keys(stateCategoryDifferences[states[0]]);
 
-        const startTable = {};
-        const differencesTable = {};
-        
-        for (let key in start) {
-            let parts = key.split(",");
-            let state = parts[0];
-            let category = parts[1];
+        states.sort();
+        categories.sort();
 
-            startTable[(state, category)] = start[key];
-
-            if (!states.includes(state)) {
-                states.push(state);
-            }
-
-            if (!categories.includes(category)) {
-                categories.push(category);
-            }
-        }
-
-        for (let key in end) {
-            let parts = key.split(",");
-            let state = parts[0];
-            let category = parts[1];
-
-            differencesTable[(state, category)] = end[key] - startTable[(state, category)];
-        }
-
-        // reverse the order of the states
-        states.reverse();
-
-        // build up 2d array of differences
         for (let i = 0; i < states.length; i++) {
+            let state = states[i];
             let row = [];
             for (let j = 0; j < categories.length; j++) {
-                let state = states[i];
                 let category = categories[j];
-                let key = (state, category);
-                row.push(differencesTable[key]);
+                row.push(stateCategoryDifferences[state][category]);
             }
             differences.push(row);
         }
@@ -291,4 +298,6 @@ function main() {
 
     //fire end change event to update the plot
     averageByCategoryStateEnd.dispatchEvent(new Event("change"));
+
+    
 }
