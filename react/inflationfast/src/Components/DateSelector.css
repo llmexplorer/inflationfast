@@ -1,0 +1,28 @@
+.dateSelector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+
+    margin-bottom: 20px;
+  }
+  
+  .dateSelector label {
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .dateSelector input[type="date"] {
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+  }
+  
+  .dateSelector input[type="date"]:focus {
+    border-color: #007bff;
+  }
+  

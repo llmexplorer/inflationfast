@@ -1,0 +1,25 @@
+/* index.css */
+html, body, #root {
+  min-height: 100vh; /* Use viewport height (vh) for full screen height */
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9c9;
+}
+
+.pageContainer {
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.gutter {
+  flex: 1;
+}
+
+.contentContainer {
+  max-width: 800px;
+  min-height: 100%; /* Ensure content container expands to fit content */
+  flex: 5;
+}

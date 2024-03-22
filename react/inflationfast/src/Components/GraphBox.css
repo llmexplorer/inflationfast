@@ -1,0 +1,38 @@
+.graphBox {
+    background-color: #e8f5e9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .graphTitle {
+    font-family: 'Arial', sans-serif;
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+    margin-bottom: 10px;
+  }
+  
+  .graphExplainerText {
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+    margin-bottom: 20px;
+  }
+  
+  .graphPlaceholder {
+    width: 100%;
+    min-height: 500px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Arial', sans-serif;
+    color: #999;
+    font-size: 16px;
+  }
+  

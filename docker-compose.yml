@@ -31,10 +31,20 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf
       - ./static:/usr/share/nginx/html
     depends_on:
       - fastapi-app
+
+  react-app:
+    build:
+      context: ./react/inflationfast
+      dockerfile: dockerfile.dev
+    container_name: react-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nginx
 
 volumes:
   postgres_data:
