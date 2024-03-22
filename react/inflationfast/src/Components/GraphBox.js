@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Plotly from 'plotly.js-dist-min';
 import DateSelector from './DateSelector';
 import './GraphBox.css';
 

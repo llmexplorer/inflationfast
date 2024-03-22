@@ -75,10 +75,12 @@ function HeatmapGraph({ graphId, title, description, withDateSelector, getData }
             height: Math.max(500, states.length * 20),
             
         }, {
-            displayModeBar: false,
             scrollZoom: false,
-            doubleClick: false,
-            dragMode: false
+            displayModeBar: false,
+            editable: false,
+            editSelection: false,
+            showAxisDragHandles: false,
+            showAxisRangeEntryBoxes: false,
         });
 
         setStartDate(newStartDate);

@@ -41,10 +41,13 @@ function LineGraph({ graphId, title, description, withDateSelector, getData }) {
         }], {
             margin: { t: 0 }
         }, {
-            displayModeBar: false,
             scrollZoom: false,
-            doubleClick: false,
-            dragMode: false
+            displayModeBar: false,
+            editable: false,
+            editSelection: false,
+            showAxisDragHandles: false,
+            showAxisRangeEntryBoxes: false,
+            staticPlot: true
         });
 
     }, [data]);
