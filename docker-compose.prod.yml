@@ -19,6 +19,6 @@ services:
   react-app:
     build:
       context: ./react/inflationfast
-      dockerfile: Dockerfile.prod  # Use the production Dockerfile
+      dockerfile: dockerfile
     restart: always
     container_name: react-app
