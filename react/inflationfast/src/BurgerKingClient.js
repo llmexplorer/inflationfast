@@ -5,6 +5,7 @@ const bkc = {
         const protocol = window.location.protocol;
 
         return protocol + "//" + hostname + "/api";
+        //return "https://inflationfast.com/api"
     },
     getAveragePricesByDay: (success, failure) => {
         fetch(bkc.getUrl() + "/average_price_by_day")

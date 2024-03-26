@@ -6,6 +6,8 @@ import GraphBox from './GraphBox';
 
 function LineGraph({ graphId, title, description, withDateSelector, getData }) {
     const [data, setData] = useState([]);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     useEffect(() => {
         getData(setData, (e) => {console.error("Error getting data", e)});
@@ -52,9 +54,28 @@ function LineGraph({ graphId, title, description, withDateSelector, getData }) {
 
     }, [data]);
 
-    
+
+    const handleStartDateChange = (date) => {
+        setStartDate(date);
+        // You can add additional logic here to filter data based on the new start date
+    };
+
+    const handleEndDateChange = (date) => {
+        setEndDate(date);
+        // You can add additional logic here to filter data based on the new end date
+    };
+
     return (
-        GraphBox({ title, description, graphId, withDateSelector })
+        <GraphBox 
+            title={title} 
+            description={description} 
+            graphId={graphId} 
+            withDateSelector={withDateSelector} 
+            startDate={startDate} 
+            endDate={endDate} 
+            onStartChange={handleStartDateChange} 
+            onEndChange={handleEndDateChange} 
+        />
     );
 }
 
