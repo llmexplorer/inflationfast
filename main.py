@@ -10,10 +10,14 @@ import os
 import logging
 from request_schemas import IdsInput, PricesByCategoryInput
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
+# save logs to a file - rotate daily
+logging.basicConfig(
+    filename='app.log',
+    filemode='a',
+    format='%(asctime)s - %(message)s',
+    level=logging.INFO
+)
 logging.info("Starting up")
-
 
 # Get the password from the environment
 postgres_password = os.environ.get("POSTGRES_PASSWORD")
@@ -129,7 +133,7 @@ async def get_average_prices_by_category(date_str: str) -> Dict[str, List]:
     date = datetime.strptime(date_str, "%Y-%m-%d").date()
 
     async with app.state.pool.acquire() as conn:
-        # Execute the query and fetch the results
+        # Execute the query and fetch the results - reverse order of state
         records = await conn.fetch(
             """
             SELECT
@@ -145,7 +149,9 @@ async def get_average_prices_by_category(date_str: str) -> Dict[str, List]:
             where
                 bm.created_date = $1
             group by
-                br.state, bi.category;
+                br.state, bi.category
+            order by
+                br.state desc;
             """,
             date  # Pass the datetime.date object to the query
         )
@@ -183,7 +189,7 @@ async def get_prices_by_category(input_data: PricesByCategoryInput):
 
 @router.get("/visit")
 async def log_visit(request: Request):
-    client_ip = request.client.host
+    client_ip = request.headers.get("X-Forwarded-For").split(",")[0]
     visit_time = datetime.now()
     user_agent = request.headers.get("User-Agent")
     referrer = request.headers.get("Referer")

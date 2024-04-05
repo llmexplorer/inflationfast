@@ -44,7 +44,7 @@ function HeatmapGraph({ graphId, title, description, withDateSelector, getData }
             // if the state is not in the differences object, skip it.  (This will break the graph though...)
             if (!differences[state]) continue;
 
-            differences[state][category] = differences[state][category] - price;
+            differences[state][category] = price - differences[state][category];
         }
 
         const states = Object.keys(differences);
