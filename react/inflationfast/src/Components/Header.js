@@ -9,7 +9,6 @@ function Header() {
 
   useEffect(() => {
     bkc.countIds(["restaurants", "menuitems", "visits"], (counts) => {
-      console.log("counts", counts);
       setVisitorCount(counts.visits);
       setMenuItems(counts.menuitems);
       setRestaurants(counts.restaurants);

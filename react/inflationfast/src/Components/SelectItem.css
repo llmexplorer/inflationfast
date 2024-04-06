@@ -1,0 +1,96 @@
+.itemSelectBox {
+    width: 50%;
+}
+
+.selectItemInput {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* ensure padding doesn't affect the total width */
+    font-size: 16px; /* increase font size for better readability */
+    margin-bottom: 5px; /* space between the input and the dropdown */
+  }
+  
+  .selectItemInput:focus {
+    outline: none;
+    border-color: #007bff; /* highlight the input when focused */
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* subtle glow effect */
+  }
+  
+
+.dropdownContent {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.9); /* slightly faded white */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* subtle shadow */
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 10;
+  }
+  
+  .searchCandidate {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee; /* subtle border between items */
+  }
+  
+  .searchCandidate:last-child {
+    border-bottom: none; /* remove border for the last item */
+  }
+  
+  .searchCandidate:hover {
+    background-color: #f0f0f0; /* highlight on hover */
+  }
+  
+  .itemDisplay {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px; /* space between grid items */
+    align-items: center;
+  }
+  
+  .itemDisplayImageBox {
+    grid-column: 1 / 4;
+    grid-row: 1 / 5;
+    height: 100%;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+  }
+  
+  .itemDisplayTitle {
+    font-size: 18px;
+    font-weight: bold;
+    grid-column: 4 / 13;
+    grid-row: 1 / 2;
+  }
+  
+  .itemDisplayDescription {
+    grid-column: 4 / 13;
+    grid-row: 2 / 3;
+    font-size: 14px;
+  }
+  
+  .itemDisplayAverageCost {
+    grid-column: 4 / 7;
+    grid-row: 3 / 4;
+    font-size: 14px;
+  }
+
+.itemDisplayAverageCalories {
+    grid-column: 7 / 10;
+    grid-row: 3 / 4;
+    font-size: 14px;
+}
+  
+.itemDisplayLabelDescription,
+.itemDisplayLabelCost,
+.itemDisplayLabelCalories {
+font-weight: bold;
+}
+
+.itemDisplayImage {
+width: 100%; /* Make the image take up the full width of its parent */
+height: 100%; /* Make the image take up the full height of its parent */
+object-fit: contain; /* This will ensure the image maintains its aspect ratio and fits within the parent container */
+}

@@ -11,7 +11,7 @@ function LineGraph({ graphId, title, description, withDateSelector, getData }) {
 
     useEffect(() => {
         getData(setData, (e) => {console.error("Error getting data", e)});
-    }, []);
+    }, [title]);
 
     useEffect(() => {
         if (data.length === 0) return;

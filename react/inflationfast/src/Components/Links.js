@@ -8,6 +8,9 @@ function Links() {
       <h3>Open Source</h3>
       <p><a href="https://github.com/llmexplorer/inflationfast">Website</a></p>
       <p><a href="https://github.com/llmexplorer/BKDataHarvest">Burger King Scraper Script</a></p>
+      <h3>Social Media</h3>
+      <p><a href="https://www.youtube.com/@lthlnkso/videos">YouTube</a> - I describe how I used ChatGPT to help make this website.</p>
+      <p><a href="https://twitter.com/lthlnkso">Twitter</a> - I post random thoughts and graphs I've made.</p>
     </div>
   );
 }

@@ -4,15 +4,29 @@ import Header from './Components/Header';
 import HeatmapGraph from './Components/HeatmapGraph';
 import LineGraph from './Components/LineGraph';
 import Links from './Components/Links';
+import SpecificItemDisplay from './Components/SpecificItemDisplay';
 import './index.css';
 import './App.css';
 import bkc from './BurgerKingClient';
 
 function App() {
+  const uniqueItems = {};
+  const itemsList = [];
 
   React.useEffect(() => {
     bkc.visit();
+    bkc.getItems((items) => {
+      items.forEach((item) => {
+        uniqueItems[item.name] = item;
+        uniqueItems[item.name].searchValue = item.name;
+      });
+      for (const key in uniqueItems) {
+        itemsList.push(uniqueItems[key]);
+      }
+    });
+
   }, []);
+      
 
   return (
     <div className="pageContainer">
@@ -21,7 +35,7 @@ function App() {
         <Header />
         <LineGraph
           title="Average Menu Item"
-          description="Average price of every item at every Burger King each day."
+          description="Average price of every item at every Burger King each day in CENTS."
           graphId="averageMenuItemOverTime"
           getData={bkc.getAveragePricesByDay}
           graphType="line"
@@ -40,6 +54,12 @@ function App() {
           description={'A meal is a whopper, vanilla shake, and large fries per <a href="https://twitter.com/WallStreetSilv/status/1764297174819770398">inspiration</a>'}
           graphId="averageMealPriceByDay"
           getData={bkc.getAverageMealPriceByDay}
+        />
+        <SpecificItemDisplay 
+          title={"Cost per calorie"} 
+          description={"Average cost per calorie of an item over time.  Some items don't show up, will fix later."}
+          itemsList={itemsList} 
+          getData={bkc.getCostPerCalorieOverTime} 
         />
         {/* <LineGraph
           title="Cost per Calorie Over Time"

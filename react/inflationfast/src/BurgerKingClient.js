@@ -3,9 +3,14 @@ const bkc = {
     getUrl: () => {
         const hostname = window.location.hostname;
         const protocol = window.location.protocol;
+        const fullHost = window.location.host;
+
+        // if hostname ends in :3000, we are in development mode
+        if (fullHost.endsWith(":3000")) {
+            return "https://localhost/api"
+        }
 
         return protocol + "//" + hostname + "/api";
-        //return "https://inflationfast.com/api"
     },
     getAveragePricesByDay: (success, failure) => {
         fetch(bkc.getUrl() + "/average_price_by_day")
@@ -57,7 +62,7 @@ const bkc = {
             },
         })
         .then(response => response.text())
-        .then(console.log)
+        .then(() => {})
         .catch(console.error);
     },
     getAvailableDates: (success, failure) => {
@@ -71,7 +76,25 @@ const bkc = {
         .then(response => response.json())
         .then(success)
         .catch(failure);
-    }
+    },
+    getCostPerCalorieOverTime: (itemId, success, failure) => {
+        fetch(bkc.getUrl() + "/get_cost_per_calorie", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({item_id: itemId})
+        })
+        .then(response => response.json())
+        .then(success)
+        .catch(failure);
+    },
+    getItems: (success, failure) => {
+        fetch(bkc.getUrl() + "/get_items")
+        .then(response => response.json())
+        .then(success)
+        .catch(failure);
+    },
 };
 
 export default bkc;
