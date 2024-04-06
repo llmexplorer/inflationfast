@@ -9,3 +9,6 @@ class IdsInput(BaseModel):
 class PricesByCategoryInput(BaseModel):
     start_date: str
     end_date: str
+
+class CostPerCalorieInput(BaseModel):
+    item_id: str

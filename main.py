@@ -8,7 +8,7 @@ from starlette.requests import Request
 from datetime import datetime
 import os
 import logging
-from request_schemas import IdsInput, PricesByCategoryInput
+from request_schemas import *
 
 # save logs to a file - rotate daily
 logging.basicConfig(
@@ -235,6 +235,109 @@ async def log_visit(request: Request):
     }
 
 
+async def get_items_average_cost(item_ids: List[str], date: datetime) -> List[float]:
+    async with app.state.pool.acquire() as conn:
+        # Execute the query to get the average price for each item
+        records = await conn.fetch(
+            """
+            SELECT item_id, AVG(price_default) AS avg_price
+            FROM bk_menuitems
+            WHERE item_id = ANY($1) AND created_date = $2
+            GROUP BY item_id
+            """,
+            item_ids,
+            date
+        )
+
+        # Extract the average prices from the records
+        avg_prices = [record['avg_price'] for record in records]
+
+        return avg_prices
+
+
+async def get_all_item_details() -> List[Dict]:
+    async with app.state.pool.acquire() as conn:
+        # Execute the query to get the details of all items
+        records = await conn.fetch(
+            """
+            SELECT bi.name, bi.item_id, AVG(mi.price_default) AS average_price, calories, image_url
+            FROM (
+                SELECT item_id, name, calories, image_url
+                FROM bk_items
+                WHERE created_date = (
+                    SELECT MAX(created_date)
+                    FROM bk_items
+                )
+            ) AS bi
+            JOIN bk_menuitems AS mi ON bi.item_id = mi.item_id
+            GROUP BY bi.item_id, name, calories, image_url
+            order by name;
+            """
+        )
+
+        return records
+    
+
+@router.get("/get_items")
+async def get_items(request: Request):
+    logging.info("Getting all items")
+    return data["items"]
+
+
+async def load_cost_per_calorie_data():
+    async with app.state.pool.acquire() as conn:
+        # Execute the query to get the cost per calorie for each item
+        records = await conn.fetch(
+            """
+            SELECT 
+                i.item_id,
+                mi.created_date,
+                AVG(mi.price_default),
+                AVG(mi.price_default / i.calories) AS avg_price_per_calorie
+            FROM 
+                bk_menuitems AS mi
+            JOIN 
+                bk_items AS i ON mi.item_id = i.item_id
+            WHERE 
+                i.calories > 0
+            GROUP BY 
+                i.item_id,
+                mi.created_date; 
+            """
+        )
+
+        # Format the result as an object with item_id: cost_per_calorie
+        result = {}
+
+        for record in records:
+            item_id = record['item_id']
+            created_date = record['created_date']
+            # format date as YYYY-MM-DD
+            created_date = created_date.strftime("%Y-%m-%d")
+            cost_per_calorie = record['avg_price_per_calorie']
+
+            if item_id not in result:
+                result[item_id] = {}
+
+            result[item_id][created_date] = cost_per_calorie
+
+        return result
+
+@router.post("/get_cost_per_calorie")
+async def get_cost_per_calorie_over_time(request: CostPerCalorieInput):
+    logging.info(f"Getting cost per calorie for {request.item_id}")
+
+    x = [];
+    y = [];
+
+    cpc = data["cost_per_calorie"].get(request.item_id, {})
+    for date in cpc:
+        x.append(date)
+        y.append(cpc[date])
+
+    return {"x": x, "y": y}
+
+
 async def update_cache():
     """Update the cache with the latest data from the database. This function is called on startup and can also be called manually."""
     logging.info("Updating cache")
@@ -261,6 +364,12 @@ async def update_cache():
     average_meal_price_by_day = await get_average_meal_price_by_day()
     data["average_meal_price_by_day"] = average_meal_price_by_day
     logging.info("Average meal price by day updated")
+
+    data["cost_per_calorie"] = await load_cost_per_calorie_data()
+    logging.info("Cost per calorie updated")
+
+    data["items"] = await get_all_item_details()
+    logging.info("Items updated")
 
     logging.info("Cache updated")
 
