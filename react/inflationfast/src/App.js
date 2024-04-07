@@ -10,21 +10,12 @@ import './App.css';
 import bkc from './BurgerKingClient';
 
 function App() {
-  const uniqueItems = {};
-  const itemsList = [];
+  const [ itemsList, setItemsList ] = React.useState([]);
+  
 
   React.useEffect(() => {
     bkc.visit();
-    bkc.getItems((items) => {
-      items.forEach((item) => {
-        uniqueItems[item.name] = item;
-        uniqueItems[item.name].searchValue = item.name;
-      });
-      for (const key in uniqueItems) {
-        itemsList.push(uniqueItems[key]);
-      }
-    });
-
+    bkc.getItems(setItemsList, (e) => {console.error("Error getting menu items", e)});
   }, []);
       
 

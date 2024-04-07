@@ -21,8 +21,8 @@ function SpecificItemDisplay({ title, description, itemsList, getData }) {
       <LineGraph 
           key={selectedItem.itemId}
           graphId='specificItemDisplay'
-          title={selectedItem.searchValue}
-          description={'Cost per calorie for ' + selectedItem.searchValue + ' over time'}
+          title={selectedItem.name}
+          description={'Cost per calorie for ' + selectedItem.name + ' over time'}
           withDateSelector={false}
           getData={(success, failure) => {
             if (!selectedItem.item_id) {
